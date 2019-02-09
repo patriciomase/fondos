@@ -3,7 +3,9 @@ const fetch = require('node-fetch');
 
 const bloomberg = 'https://www.bloomberg.com/markets2/api/history/{{fund}}%3AAR/PX_LAST?timeframe=1_MONTH&period=daily&volumePeriod=daily';
 const validFunds = [
-  'FBARFPB'
+  'FBAHORA',  // Horizonte
+  'BFRENTP',  // Renta pesos
+  'FBARFPB'   // Renta fija plus
 ];
 
 module.exports = (req, res) => {
