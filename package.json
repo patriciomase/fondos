@@ -1,5 +1,12 @@
 {
+  "scripts": {
+    "local": "node server.js",
+    "watch": "nodemon server.js"
+  },
   "dependencies": {
     "node-fetch": "^2.3.0"
+  },
+  "devDependencies": {
+    "nodemon": "^1.18.10"
   }
 }
