@@ -9,21 +9,40 @@ const validFunds = [
 ];
 
 module.exports = (req, res) => {
-  const queryParams = parse(req.url, true).query;
+  const headers = {
+    'Access-Control-Allow-Origin': 'http://localhost:8999',
+    'Access-Control-Allow-Methods': 'OPTIONS, POST, GET',
+    'Access-Control-Max-Age': 2592000, // 30 days
+    /** add other headers as per requirement */
+  };
 
-  if (!validFunds.find(elem => elem == queryParams.fund)) {
-    return res.end(JSON.stringify({ error: 'Fund not allowed' }));
+  if (req.method === 'OPTIONS') {
+    res.writeHead(204, headers);
+    res.end();
+    return;
   }
 
-  fetch(bloomberg.replace('{{fund}}', queryParams.fund), {
-    headers: {
-      'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
+  if (['GET', 'POST'].indexOf(req.method) > -1) {
+    const queryParams = parse(req.url, true).query;
+
+    if (!validFunds.find(elem => elem == queryParams.fund)) {
+      return res.end(JSON.stringify({ error: 'Fund not allowed' }));
     }
-  })
-    .then(response => response.text())
-    .then(response => {
-      console.log(response);
-      res.end(response);
+  
+    fetch(bloomberg.replace('{{fund}}', queryParams.fund), {
+      headers: {
+        'user-agent': 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_14_2) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/71.0.3578.98 Safari/537.36'
+      }
     })
-    .catch(err => res.end(JSON.stringify({ error: err.message })));
+      .then(response => response.text())
+      .then(response => {
+        res.writeHead(200, headers);
+        res.end(response);
+      })
+      .catch(err => res.end(JSON.stringify({ error: err.message })));
+  }
+  else {
+    res.writeHead(405, headers);
+    res.end(`${req.method} is not allowed for the request.`);
+  }
 }
