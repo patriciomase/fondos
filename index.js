@@ -1,30 +1,29 @@
 const { parse } = require('url');
 const fetch = require('node-fetch');
 
-const bloomberg = 'https://www.bloomberg.com/markets2/api/history/{{fund}}%3AAR/PX_LAST?timeframe=1_MONTH&period=daily&volumePeriod=daily';
+const bloomberg = 'https://www.bloomberg.com/markets2/api/history/{{fund}}%3AAR/PX_LAST?timeframe={{timeframe}}&period={{period}}&volumePeriod={{period}}';
 const validFunds = [
   'FBAHORA',  // Horizonte
   'BFRENTP',  // Renta pesos
-  'FBARFPB',  // Renta fija plus
-  'FACCARB',  // Acciones Argentina
-  'BFBARGB',  // Bonos Argentina
-  'FBAHOPB',  // Horizonte plus
-  'FBABONB',  // Bonos globales
+  'FBARFPA',  // Renta fija plus
+  'FACCARA',  // Acciones Argentina
+  'BFBARGA',  // Bonos Argentina
+  'FBAHOPA',  // Horizonte plus
+  'FBABONA',  // Bonos globales
   'FBARFDA',  // Renta fija dolar
-  'FRFDPLB',  // Renta fija dolar plus
+  'FRFDPLA',  // Renta fija dolar plus
   'FBABLAA',  // Bonos latam
-  'FBARMXB',  // Renta mixta
-  'FBARTIB',  // Retorno total
-  'FBRTIIB',  // Retorno total II (USD)
+  'FBARMXA',  // Renta mixta
+  'FBARTIA',  // Retorno total
+  'FBRTIIA',  // Retorno total II A (USD)
   'BFCALIF',  // Calificado
-  'BFALATB',  // Acciones Latinoamericanas
-  'FBABRAD',  // Brasil I
+  'BFALATA',  // Acciones Latinoamericanas
+  'FBABRAC',  // Brasil I
 ];
 
 let cache = {};
 function memoFetch(uri) {
   if (cache[uri]) {
-    console.log('FROM CACHE', cache[uri]);
     return Promise.resolve(cache[uri]);
   }
   return fetch(uri, {
@@ -60,7 +59,12 @@ module.exports = (req, res) => {
       return res.end(JSON.stringify({ error: 'Fund not allowed' }));
     }
   
-    memoFetch(bloomberg.replace('{{fund}}', queryParams.fund))
+    memoFetch(bloomberg
+      .replace('{{fund}}', queryParams.fund)
+      .replace('{{timeframe}}', queryParams.timeframe || '1_MONTH')
+      .replace('{{period}}', queryParams.timeframe === '6_MONTH' ? 'weekly' : 'daily')
+      .replace('{{period}}', queryParams.timeframe === '6_MONTH' ? 'weekly' : 'daily')
+      )
       .then(response => {
         res.writeHead(200, headers);
         res.end(response);
